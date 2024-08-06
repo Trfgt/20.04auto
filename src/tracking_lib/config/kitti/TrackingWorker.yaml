@@ -1,0 +1,41 @@
+tracking: {
+  ##----------------- Tracking-help Segmentation
+  # threshold used for judging "contains"
+  threshold_contian_IoU: 0.6,
+
+  TrackingWorker: {
+    ##----------------- Matcher: tracker<->observed object association
+    matcher_method_name: "hungarian_matcher",
+    matcher_match_distance_maximum: 0.1,  # 매칭 거리 최대값 감소
+    # motion consistency
+    matcher_location_distance_weight: 5.0,  # 위치 가중치 조정
+    matcher_direction_distance_weight: 3.0, # 방향 가중치 조정
+    # appearance consistency
+    matcher_bbox_size_distance_weight: 1.0, # 바운딩 박스 크기 가중치 증가
+    matcher_point_num_distance_weight: 1.0, # 포인트 수 가중치 증가
+    matcher_histogram_distance_weight: 1.0,  # 히스토그램 가중치 증가
+
+    ##----------------- Tracker
+    # Tracker Filter setup
+    filter_method_name: "robust_kalman_filter",
+    filter_use_adaptive: true,
+    filter_association_score_maximum: 0.5,  # 필터 연관 점수 감소
+    filter_measurement_noise: 0.01,  # 측정 노이즈 감소
+    filter_initial_velocity_noise: 0.01,  # 초기 속도 노이즈 감소
+    filter_xy_propagation_noise: 0.01,  # xy 전파 노이즈 감소
+    filter_z_propagation_noise: 0.01,  # z 전파 노이즈 감소
+    filter_breakdown_threshold_maximum: 1.0,  # 최대 고장 임계값 감소
+    # Basic Tracker setup
+    tracker_cached_history_size_maximum: 50,  # 캐시된 히스토리 크기 증가
+    tracker_consecutive_invisible_maximum: 5,  # 연속 보이지 않는 최대 값 증가
+    tracker_visible_ratio_minimum: 0.9,  # 최소 가시 비율 증가
+    tracker_acceleration_noise_maximum: 0.01,  # 최대 가속 노이즈 감소
+    tracker_speed_noise_maximum: 0.01,  # 최대 속도 노이즈 감소
+
+    ##----------------- Tracking Objects collect conditions
+    tracking_use_histogram_for_match: true,  # 히스토그램 매칭 사용
+    tracking_histogram_bin_size: 32,  # 히스토그램 빈 크기 유지
+    tracking_collect_age_minimum: 10,  # 최소 추적 나이 증가
+    tracking_collect_consecutive_invisible_maximum: 2,  # 연속 보이지 않는 최대 값 감소
+  }
+}

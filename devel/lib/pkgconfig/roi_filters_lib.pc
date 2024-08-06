@@ -1,0 +1,8 @@
+prefix=/home/trobo/lidar_ws/devel
+
+Name: roi_filters_lib
+Description: Description of roi_filters_lib
+Version: 0.0.0
+Cflags: -I/home/trobo/lidar_ws/src/roi_filters/include
+Libs: -L${prefix}/lib -lroi_filters_lib
+Requires: 

@@ -1,0 +1,8 @@
+prefix=/home/trobo/lidar_ws/devel
+
+Name: object_builders_lib
+Description: Description of object_builders_lib
+Version: 0.0.0
+Cflags: -I/home/trobo/lidar_ws/src/object_builders_lib/include
+Libs: -L${prefix}/lib -lobject_builders_lib
+Requires: 

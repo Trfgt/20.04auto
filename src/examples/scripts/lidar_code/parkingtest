@@ -1,0 +1,96 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+import rospy
+import os
+from std_msgs.msg import Float32MultiArray
+from sensor_msgs.msg import Imu
+from morai_msgs.msg import GPSMessage
+from nav_msgs.msg import Odometry
+from pyproj import CRS, Transformer
+from tracking_msg.msg import TrackingObjectArray
+import pyproj
+from math import pi, cos, sin, radians, degrees, atan2, asin
+import math
+from geometry_msgs.msg import Quaternion
+import numpy as np
+
+class GPS2UTM:
+    def __init__(self):
+        rospy.loginfo("GPS2UTM is Created")
+        self.start_longitude = 0.0  # 초기값 설정
+        self.start_latitude = 0.0   # 초기값 설정
+        self.heading = 0.0          # 초기값 설정
+        rospy.Subscriber("/gps", GPSMessage, self.gps_callback)
+        rospy.Subscriber("/imu", Imu, self.imu_callback)
+        rospy.Subscriber("/lidar/tracking_objects", TrackingObjectArray, self.lidar_callback)
+        self.tempa = self.tempb = 0
+
+    def gps_callback(self, _data):
+        self.start_longitude = _data.longitude
+        self.start_latitude = _data.latitude
+
+    def imu_callback(self, _data):
+        self.Orientation = _data.orientation
+        self.heading = self.calculate_heading_from_imu()
+
+    def lidar_callback(self, _data):
+        total_obj_cnt = _data.size
+
+        pointcloud = []
+        for i in range(total_obj_cnt):
+            self.delta_x = _data.array[i].point.x
+            self.delta_y = _data.array[i].point.y
+            end_utm_easting, end_utm_northing = self.calculate_longitude_latitude()
+            pointcloud.append([end_utm_easting, end_utm_northing])
+
+        pointcloud_np = np.array(pointcloud)
+
+    def calculate_longitude_latitude(self):
+        transformer = Transformer.from_crs(CRS.from_epsg(4326), CRS.from_epsg(32652), always_xy=True)  # UTM Zone 52
+        start_utm_easting, start_utm_northing = transformer.transform(self.start_longitude, self.start_latitude)
+
+        heading_rad = radians(self.heading)
+
+        delta_utm_easting = self.delta_x * cos(heading_rad) - self.delta_y * sin(heading_rad)
+        delta_utm_northing = self.delta_x * sin(heading_rad) + self.delta_y * cos(heading_rad)
+
+        end_utm_easting = start_utm_easting + delta_utm_easting
+        end_utm_northing = start_utm_northing + delta_utm_northing
+
+        return end_utm_easting, end_utm_northing
+
+    def calculate_heading_from_imu(self):
+        x = self.Orientation.x
+        y = self.Orientation.y
+        z = self.Orientation.z
+        w = self.Orientation.w
+
+        roll, pitch, yaw = self.quaternion_to_euler(x, y, z, w)
+        heading = (degrees(yaw) + 360) % 360
+
+        return heading
+
+    def quaternion_to_euler(self, x, y, z, w):
+        t0 = +2.0 * (w * x + y * z)
+        t1 = +1.0 - 2.0 * (x * x + y * y)
+        roll = atan2(t0, t1)
+
+        t2 = +2.0 * (w * y - z * x)
+        t2 = +1.0 if t2 > +1.0 else t2
+        t2 = -1.0 if t2 < -1.0 else t2
+        pitch = asin(t2)
+
+        t3 = +2.0 * (w * z + x * y)
+        t4 = +1.0 - 2.0 * (y * y + z * z)
+        yaw = atan2(t3, t4)
+
+        return roll, pitch, yaw
+
+def run():
+    rospy.init_node("gps2utm")
+    new_class = GPS2UTM()
+    rospy.spin()
+
+if __name__ == '__main__':
+    run()

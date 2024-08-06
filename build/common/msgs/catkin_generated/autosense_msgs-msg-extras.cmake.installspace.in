@@ -1,0 +1,2 @@
+set(autosense_msgs_MESSAGE_FILES "autosense_msgs/PointCloud2Array.msg;autosense_msgs/TrackingFixedTrajectoryArray.msg")
+set(autosense_msgs_SERVICE_FILES "")

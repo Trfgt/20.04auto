@@ -1,0 +1,8 @@
+prefix=/home/trobo/lidar_ws/devel
+
+Name: feature_extractors_lib
+Description: Description of feature_extractors_lib
+Version: 0.0.0
+Cflags: -I/home/trobo/lidar_ws/src/feature_extractors/include
+Libs: -L${prefix}/lib -lfeature_extractors_lib
+Requires: 

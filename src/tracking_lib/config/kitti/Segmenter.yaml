@@ -1,0 +1,46 @@
+detect: {
+  roi: {
+    ## ROI range
+    roi_type: "Square",
+    roi_lidar_height_m: 0.88,
+    ## Horizontal range
+    roi_radius_min_m: 3.0,  # 좌우로 볼 거리
+    roi_radius_max_m: 6.0,  # 전방으로 볼 거리 증가
+    ## Vertical range
+    roi_height_below_m: 1.0,  # 아래로 볼 거리 유지
+    roi_height_above_m: 3.0,  # 위로 볼 거리 유지
+  },
+
+  Segmenter: {
+    #---------------------------------------- Ground Segmenter
+    ### Ground Plane Fitting Segmenter
+    gpf_sensor_height: 0.88,
+    gpf_num_segment: 4,  # 분할 수 유지
+    gpf_num_iter: 5,  # 반복 횟수 유지
+    gpf_num_lpr: 30,  # LPR 포인트 수 유지
+    gpf_th_lprs: 0.08,  # LPR 임계값 유지
+    gpf_th_seeds: 0.5,  # 초기 시드 임계값 유지
+    gpf_th_gnds: -1.0,  # 지면 임계값 유지
+
+    ### Ground RANSAC Segmenter
+    sac_distance_threshold: 0.3,  # 거리 임계값 유지
+    sac_max_iteration: 100,  # 최대 반복 횟수 유지
+    sac_probability: 0.9,  # 확률 유지
+
+    #---------------------------------------- Non-ground Segmenter
+    ### Region Euclidean Cluster Segmenter
+    rec_region_size: 14,  # 영역 크기 유지
+    rec_region_sizes: [4, 5, 5, 5, 5, 5, 5, 4, 5, 5, 5, 5, 5, 5],  # 영역 크기 리스트 유지
+    rec_region_initial_tolerance: 0.3,  # 초기 허용 오차 유지
+    rec_region_delta_tolerance: 0.3,  # 델타 허용 오차 유지
+    rec_min_cluster_size: 50,  # 최소 클러스터 크기 유지
+    rec_max_cluster_size: 600,  # 최대 클러스터 크기 증가
+    rec_use_region_merge: true,  # 영역 병합 사용
+    rec_region_merge_tolerance: 0.0,  # 병합 허용 오차 유지
+
+    ### Euclidean Cluster Segmenter
+    ec_tolerance: 0.6,  # 유클리드 거리 임계값 유지
+    ec_min_cluster_size: 20,  # 최소 클러스터 크기 유지
+    ec_max_cluster_size: 200,  # 최대 클러스터 크기 증가
+  },
+}

@@ -1,0 +1,2 @@
+set(autosense_msgs_MESSAGE_FILES "/home/trobo/lidar_ws/src/common/msgs/autosense_msgs/PointCloud2Array.msg;/home/trobo/lidar_ws/src/common/msgs/autosense_msgs/TrackingFixedTrajectoryArray.msg")
+set(autosense_msgs_SERVICE_FILES "")

@@ -1,0 +1,8 @@
+prefix=/home/trobo/lidar_ws/devel
+
+Name: common_lib
+Description: Description of common_lib
+Version: 0.0.0
+Cflags: -I/home/trobo/lidar_ws/src/common/include
+Libs: -L${prefix}/lib -lcommon_lib
+Requires: roscpp tf tf_conversions

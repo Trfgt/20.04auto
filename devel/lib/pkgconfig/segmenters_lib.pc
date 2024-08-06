@@ -1,0 +1,8 @@
+prefix=/home/trobo/lidar_ws/devel
+
+Name: segmenters_lib
+Description: Description of segmenters_lib
+Version: 0.0.0
+Cflags: -I/home/trobo/lidar_ws/src/segmenters_lib/include
+Libs: -L${prefix}/lib -lsegmenters_lib
+Requires: object_builders_lib
