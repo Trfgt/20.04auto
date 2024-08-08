@@ -52,7 +52,8 @@ class GPS2UTM:
         self.rfirst=False
         self.left_cones = []
         self.right_cones = []
-        self.min_distance_threshold = 1.4
+        self.min_distance_threshold = 1.6
+
         self.ltime = time.time()
         self.rtime = time.time()
         # self.stable=False
@@ -84,7 +85,13 @@ class GPS2UTM:
         if not cones_list:
             return True
         last_cone = cones_list[-1]
-        return self.euclidean_distance(last_cone, new_cone) > min_distance
+        return self.euclidean_distance(last_cone, new_cone) < min_distance
+    def find_OK_bet_R_L_bool(self, left, right):
+        for left_index in left:
+            for right_index in right:
+                if self.euclidean_distance(left_index,right_index)>self.min_distance_threshold:
+                    return False   
+        return True
     def lidar_callback(self, _data):
         
         total_obj_cnt = _data.size    
@@ -114,42 +121,49 @@ class GPS2UTM:
                 continue
             bbox_center_x, bbox_center_y = self.calculate_bounding_box_center(obj.bev.data)
             bbox_width, bbox_height = self.calculate_bounding_box_dimensions(obj.bev.data)
-            if -1<bbox_width<1.5 and -1<bbox_height<1.5:
+            if -1<bbox_width<0.5 and -1<bbox_height<0.5:
                 obj_collector.append([bbox_center_x, bbox_center_y,bbox_width, bbox_height])
-        print(len(obj_collector))
-        self.left_cones = [(-0.3, 2.0)]
-        self.right_cones = [(-0.3, -1.0)]
+        #print(len(obj_collector))
+        self.left_cones .append((-0.3, 1.5))
+        self.right_cones.append((-0.3, -1.0))
         obj_collector.sort(key=lambda x: x[0])
         for bbox_center_x, bbox_center_y,bbox_width, bbox_height in obj_collector:
             if(self.State=="Rubber_cone_drive"):
                 new_cone = (bbox_center_x, bbox_center_y)
+                #print(self.lfirst)
                 #print(new_cone)
                 if len(self.left_cones)>10 or len(self.right_cones)>10: 
                     break
-                if self.lfirst == False and 0 < bbox_center_x < 4 and -0.1 < bbox_center_y < 2:
+                if self.lfirst == False and 0 < bbox_center_x <1.5 and -0.1 < bbox_center_y < 2:
                     print("L find")
-                    self.lfirst == True
+                    self.lfirst = True
                     self.left_cones.append(new_cone)
-                elif self.lfirst == True and -1.5 < bbox_center_y < 1:
+                elif self.lfirst == True and -1 < bbox_center_y < 1.5:
                     if self.should_add_cone(self.left_cones, new_cone, self.min_distance_threshold ):
+                        #print(self.should_add_cone(self.left_cones, new_cone, self.min_distance_threshold ))
                         self.left_cones.append(new_cone)
 
-                if self.rfirst == False and 0 < bbox_center_x < 4-3*(self.lfirst and len(self.left_cones)>2)  and -2 < bbox_center_y < 0.1:
+                if self.rfirst == False and 0 < bbox_center_x < 1.5  and -2 < bbox_center_y < 0.1:
                     print("R find")
-                    self.rfirst == True
+                    self.rfirst = True
                     self.right_cones.append(new_cone)
-                elif self.rfirst == True and -1 < bbox_center_y < 1.5:
+                elif self.rfirst == True and 1 > bbox_center_y >-1.5:
                     if self.should_add_cone(self.right_cones, new_cone, self.min_distance_threshold ):
                         self.right_cones.append(new_cone)
             #print(bbox_center_x,bbox_center_y,bbox_width,bbox_height)
-        print("!!!!!!!!!!!!!!!!!!!!!!!!")
-        if len(self.left_cones) ==0:
-            self.left_cones= [(0.0,1.5)]
-        elif len(self.right_cones) ==0:
-            self.right_cones= [(0.0,-0.7)]
+        #print("!!!!!!!!!!!!!!!!!!!!!!!!")
         #print(len(self.left_cones),len(self.right_cones))
+        if self.find_OK_bet_R_L_bool(self.left_cones,self.right_cones):
+            if self.left_cones[1][0]<self.right_cones[1][0]:
+                self.left_cones.extend(self.right_cones[1:])
+                self.right_cones = [self.right_cones[0]]
+            else:
+                self.right_cones.extend(self.left_cones[1:])
+                self.left_cones = [self.left_cones[0]]
 
+        
 
+        
         self.publish_obstacles_array_one(obj_collector, self.all_rabacone_point_pub, color=(1.0, 1.0, 0.0))
 
         if len(self.left_cones) >= 2 and len(self.right_cones) < 2:
